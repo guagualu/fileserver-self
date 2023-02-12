@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+
+
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative  service/dbproxy/proto/*.proto
+//查找位置 产生的包名
+option go_package = "./service/dbproxy/proto;proto"; 
+
+message SingleAction {
+	string name = 1;
+	bytes params = 2; // 请求参数列表, json-encoded
+}
+message ExecReq {
+    bool Sequence =1;//是否是串行化
+    bool Transaction =2; //是否是事务
+    int32 resultType = 3; // 0表示每个sql函数的结果都返回; 1表示只返回最后一个执行sql的结果(要求sequence执行)
+    repeated SingleAction action =4;
+}
+
+//网络式resp 通过json包将信息复原到struct
+message ExecResp {
+    int32 coede =1;
+    string message =2;
+    bytes  data=3;
+}
+
+
+service DBProxyService{
+    rpc ExecAction (ExecReq) returns (ExecResp);
+}
