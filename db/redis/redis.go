@@ -98,14 +98,13 @@ func (r Rdb) SetMutex(uuid string, ctx context.Context) (bool, error) {
 		return false, err
 	}
 	if res == "OK" {
-		watchRes := make(chan WatchRes)
-		go r.watchAndPX(watchRes, ctx, conn, uuid)
+		go r.watchAndPX(ctx, conn, uuid)
 	}
 	return true, nil
 
 }
 
-func (r Rdb) watchAndPX(watchRes chan WatchRes, ctx context.Context, conn redis.Conn, uuid string) {
+func (r Rdb) watchAndPX(ctx context.Context, conn redis.Conn, uuid string) {
 	//使用定时器 进行续约
 	setExTimer := time.NewTimer(1000)
 	for {
