@@ -1,6 +1,7 @@
 package route
 
 import (
+	"context"
 	"encoding/json"
 	db "filestore/db"
 	rdlayer "filestore/db/redis"
@@ -80,6 +81,15 @@ func UserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// 	return
 	// }
+	rDB := rdlayer.Rdb{RedisPool: rdlayer.RedisPool(), ReidsMutex: "MUTEX"}
+	//获取分布式锁
+	CancleCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	isGet, err := rDB.SetMutex(username, CancleCtx)
+	if err != nil || isGet == false {
+		return
+	}
+	//获取分布式锁结束
 	//3、查询用户信息  先查缓存 如果没有 在查mysql 并对redis作缓存
 	rdconn := rdlayer.RedisPool().Get()
 	rdres, err := rdconn.Do("GET", "user_"+username)
@@ -113,6 +123,12 @@ func UserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user := db.User{}
 	json.Unmarshal(b, &user)
+	//释放锁
+	isDelete, err := rDB.DeleteMutex(username)
+	if err != nil || isDelete == false {
+		//记录日志
+		return
+	}
 	w.Write(resp.NewRespone(0, "OK", user).ToJson())
 
 }

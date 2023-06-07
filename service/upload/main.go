@@ -12,7 +12,7 @@ func main() {
 	http.HandleFunc("/user/mpupload", route.Mpupload)
 	http.HandleFunc("/user/findprogress", route.FindProgress)
 	http.HandleFunc("/user/rempupload", route.ReMpUpload)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
 		fmt.Println("listen server err:", err)
 	}

@@ -123,7 +123,7 @@ func Mpuploadinit(w http.ResponseWriter, r *http.Request) {
 		ChunkCount: filesize / config.ChunkSize,
 		ChunkSize:  config.ChunkSize,
 	}
-	//3、使用redis记录 使用map记录 filehash uploadid（相当于主键 可以自己定义规则 主要是用来唯一确定本次上传） todo
+	//3、使用redis记录 使用map记录 filehash uploadid（相当于主键 可以自己定义规则 主要是用来唯一确定本次上传）
 	redispool := rpool.RedisPool()
 	redispool.Get().Do("HSET", "MP_"+mpfileInfo.UploadId, "CHUNKCOUNT", mpfileInfo.ChunkCount)
 	// redispool.Get().Do("HSET","MP_"+mpfileInfo.UploadId,"",mpfileInfo.ChunkCount)
